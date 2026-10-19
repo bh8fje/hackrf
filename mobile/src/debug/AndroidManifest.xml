@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <instrumentation android:name=".ReceiverScenarioCheck" android:targetPackage="local.hackrf.receiver" android:label="Receiver scene validation without RF" />
+    <instrumentation android:name=".RecordingServiceCheck" android:targetPackage="local.hackrf.receiver" android:label="Recording lifecycle check" />
+    <instrumentation android:name=".ReceptionCaptureCheck" android:targetPackage="local.hackrf.receiver" android:label="Bounded real GNSS reception capture" />
+</manifest>

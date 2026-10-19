@@ -1,0 +1,19 @@
+{
+  "gps": [
+    "https://geodesy.noaa.gov/corsdata/rinex/{year}/{doy}/brdc{doy}0.{yy}n.gz"
+  ],
+  "bds": [
+    "https://www.csno-tarc.cn/data/upload/brdc/{year}/tarc{doy}0.{yy}b",
+    "https://igs.bkg.bund.de/root_ftp/NTRIP/BRDC/brdc_last.rnx.Z",
+    "https://igs.bkg.bund.de/root_ftp/IGS/BRDC/{year}/{doy}/BRDC00WRD_R_{year}{doy}0000_01D_MN.rnx.gz"
+  ],
+  "broadcast": [
+    "https://igs.bkg.bund.de/root_ftp/IGS/BRDC/{year}/{doy}/BRDC00WRD_R_{year}{doy}0000_01D_MN.rnx.gz",
+    "https://igs.bkg.bund.de/root_ftp/IGS/BRDC/{year}/{doy}/BRDC00WRD_S_{year}{doy}0000_01D_MN.rnx.gz",
+    "https://igs.bkg.bund.de/root_ftp/IGS/BRDC/{previousYear}/{previousDoy}/BRDC00WRD_R_{previousYear}{previousDoy}0000_01D_MN.rnx.gz",
+    "https://data.gnss.ga.gov.au/api/rinexFiles/ALIC00AUS_R_{previousHourYear}{previousHourDoy}{previousHour}00_01H_MN.rnx.gz?rinexVersion=3",
+    "https://data.gnss.ga.gov.au/api/rinexFiles/PERT00AUS_R_{previousHourYear}{previousHourDoy}{previousHour}00_01H_MN.rnx.gz?rinexVersion=3",
+    "https://data.gnss.ga.gov.au/api/rinexFiles/ALIC00AUS_R_{olderHourYear}{olderHourDoy}{olderHour}00_01H_MN.rnx.gz?rinexVersion=3",
+    "https://data.gnss.ga.gov.au/api/rinexFiles/PERT00AUS_R_{olderHourYear}{olderHourDoy}{olderHour}00_01H_MN.rnx.gz?rinexVersion=3"
+  ]
+}

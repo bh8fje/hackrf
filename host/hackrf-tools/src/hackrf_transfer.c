@@ -24,6 +24,7 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <hackrf.h>
+#include "tx_idle_stats.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -741,7 +742,7 @@ int main(int argc, char** argv)
 	struct timeval t_end;
 	float time_diff;
 	unsigned int lna_gain = 8, vga_gain = 20, txvga_gain = 0;
-	hackrf_m0_state state;
+	hackrf_m0_state state = {0};
 	stats_t stats = {0, 0};
 
 	while ((opt = getopt(argc, argv, "Hwr:t:f:i:o:m:a:p:s:Fn:b:l:g:x:c:d:C:RS:Bh?")) !=
@@ -1310,6 +1311,7 @@ int main(int argc, char** argv)
 		result |= hackrf_set_lna_gain(device, lna_gain);
 		result |= hackrf_start_rx(device, rx_callback, NULL);
 	} else {
+		fprintf(stderr, "call hackrf_set_txvga_gain(%u)\n", txvga_gain);
 		result = hackrf_set_txvga_gain(device, txvga_gain);
 		result |= hackrf_enable_tx_flush(device, flush_callback, NULL);
 		result |= hackrf_set_tx_block_complete_callback(
@@ -1418,7 +1420,7 @@ int main(int argc, char** argv)
 							result);
 					else
 						fprintf(stderr,
-							", %d bytes %s in buffer, %u %s, longest %u bytes\n",
+							", %d bytes %s in buffer, %u %s, longest %u bytes, M0 mode %u requested %u error %u, cumulative M0 %" PRIu64 " M4 %" PRIu64 " bytes\n",
 							tx ? state.m4_count -
 									state.m0_count :
 							     state.m0_count -
@@ -1426,7 +1428,7 @@ int main(int argc, char** argv)
 							tx ? "filled" : "free",
 							state.num_shortfalls,
 							tx ? "underruns" : "overruns",
-							state.longest_shortfall);
+							state.longest_shortfall, state.active_mode, state.requested_mode, state.error, stats.m0_total, stats.m4_total);
 				} else {
 					fprintf(stderr, "\n");
 				}
@@ -1479,6 +1481,11 @@ int main(int argc, char** argv)
 		}
 
 		if (transmit || signalsource) {
+            if (display_stats && update_stats(device, &state, &stats) == HACKRF_SUCCESS) {
+                fprintf(stderr, "Pre-stop raw: M0 %" PRIu64 " M4 %" PRIu64 " bytes, %u underruns, longest %u bytes, active %u requested %u pending %u error %u\n",
+                    stats.m0_total, stats.m4_total, state.num_shortfalls, state.longest_shortfall,
+                    state.active_mode, state.requested_mode, state.request_flag, state.error);
+            }
 			result = hackrf_stop_tx(device);
 			if (result != HACKRF_SUCCESS) {
 				fprintf(stderr,
@@ -1487,6 +1494,32 @@ int main(int argc, char** argv)
 					result);
 			} else {
 				fprintf(stderr, "hackrf_stop_tx() done\n");
+                if (display_stats) {
+                    tx_idle_stats idle = {0};
+                    bool confirmed = false;
+                    for (unsigned int poll = 0; poll < 100; poll++) {
+                        result = update_stats(device, &state, &stats);
+                        if (tx_idle_stats_update(&idle, result == HACKRF_SUCCESS,
+                            state.active_mode, state.requested_mode, state.request_flag, state.error,
+                            state.m0_count, state.m4_count, state.num_shortfalls, state.longest_shortfall)) {
+                            confirmed = true;
+                            break;
+                        }
+#ifdef _WIN32
+                        Sleep(10);
+#else
+                        usleep(10000);
+#endif
+                    }
+                    if (confirmed) {
+                        fprintf(stderr, "Post-stop IDLE confirmed: M0 %" PRIu64 " M4 %" PRIu64 " bytes, %u underruns, longest %u bytes, active %u requested %u pending %u error %u\n",
+                            stats.m0_total, stats.m4_total, state.num_shortfalls, state.longest_shortfall,
+                            state.active_mode, state.requested_mode, state.request_flag, state.error);
+                    } else {
+                        fprintf(stderr, "Post-stop IDLE not confirmed within bounded polling; stop statistics unverified\n");
+                        exit_code = EXIT_FAILURE;
+                    }
+                }
 			}
 		}
 

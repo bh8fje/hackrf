@@ -74,3 +74,26 @@ firmware/cpld/**/*.xwbt
 firmware/**/build
 
 *.pyc
+research/output/
+research/.venv/
+app/build/
+mobile/build/
+mobile/.gradle/
+mobile/local.properties
+
+mobile-controller/build/
+mobile-controller/.gradle/
+mobile-controller/local.properties
+
+# Public source only; never commit local credentials or captures.
+**/__pycache__/
+*.hprof
+*.jks
+*.keystore
+*.apk
+*.aab
+*.hriq
+*.log
+.env*
+**/amap.json
+releases/

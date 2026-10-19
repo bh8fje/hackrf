@@ -4,3 +4,9 @@
 [submodule "hardware/gsg-kicad-lib"]
 	path = hardware/gsg-kicad-lib
 	url = https://github.com/greatscottgadgets/gsg-kicad-lib.git
+[submodule "research/gps-sdr-sim"]
+	path = research/gps-sdr-sim
+	url = https://github.com/osqzss/gps-sdr-sim.git
+[submodule "research/SignalSim"]
+	path = research/SignalSim
+	url = https://github.com/globsky/SignalSim.git

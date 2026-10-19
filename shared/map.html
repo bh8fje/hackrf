@@ -1,0 +1,57 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https://tile.openstreetmap.org walklab-tile:; style-src 'unsafe-inline'; script-src 'unsafe-inline'"><style>
+html,body{margin:0;height:100%;font:13px system-ui;color:#193b42}#map{height:100%;overflow:hidden;position:relative;background:#e7eef0;touch-action:none}#grid,#tracks{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#tiles{position:absolute;inset:0}img{position:absolute;width:256px;height:256px;user-select:none;pointer-events:none}#pin{position:absolute;width:15px;height:15px;background:#087f79;border:3px solid white;border-radius:50%;box-shadow:0 1px 5px #335;transform:translate(-50%,-50%);pointer-events:none}#simulation{position:absolute;left:6px;bottom:50px;max-width:calc(100% - 26px);max-height:64px;overflow:auto;touch-action:pan-y;white-space:pre-line;background:#fffE;padding:5px 7px;border-radius:5px;font-size:11px;pointer-events:auto}#simulation:empty{display:none}#tools{position:absolute;right:6px;top:6px;display:flex;gap:4px}button{height:32px;width:32px;min-width:32px;padding:0;border:1px solid #c2d1d4;border-radius:6px;background:#fffffff0;color:#193b42;font:14px system-ui}#mode{width:44px;font-size:12px}#receiver{width:58px;font-size:12px}#credit,#hint{position:absolute;background:#fffd;padding:4px 7px;font-size:11px;border-radius:4px;pointer-events:none}#credit{pointer-events:auto;bottom:0;right:0}#hint{left:6px;top:44px;max-width:calc(100% - 26px)}
+</style><div id="map" role="region" aria-label="导航轨迹地图，可拖动和缩放"><canvas id="grid"></canvas><div id="tiles"></div><canvas id="tracks" aria-hidden="true"></canvas><div id="pin"></div><div id="hint" role="status">地图加载中…</div><div id="simulation" role="status"></div><div id="tools"><button id="receiver" aria-label="回到最近的 GNSS 接收位置" hidden>接收点</button><button id="mode" aria-label="切换离线网格或联网底图" title="切换为联网底图">联网</button><button id="minus" aria-label="缩小地图">−</button><button id="plus" aria-label="放大地图">＋</button><button id="home" aria-label="回到模拟地点">◎</button></div><div id="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a></div></div><script>
+'use strict';
+const map=document.getElementById('map'),tiles=document.getElementById('tiles'),pin=document.getElementById('pin'),hint=document.getElementById('hint');
+let z=15,center=null,target=null,drag=null,online=false;
+let trajectories=[[],[],[]],receivedFresh=false;
+const grid=document.getElementById("grid"),credit=document.getElementById("credit"),mode=document.getElementById("mode");credit.hidden=true;
+function project(lat,lon){let n=256*2**z,r=Math.max(-85.05112878,Math.min(85.05112878,lat))*Math.PI/180;return [(lon+180)/360*n,(1-Math.asinh(Math.tan(r))/Math.PI)/2*n]}
+function unproject(x,y){let n=256*2**z;return [Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,((x/n*360)%360+360)%360-180]}
+function validPoint(p){return Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=85&&Math.abs(p[1])<=180}
+function renderTracks(w,h,c,world){
+ const canvas=document.getElementById('tracks');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');
+ if(target){const p=project(...target),radius=150*world/(40075016.686*Math.cos(target[0]*Math.PI/180));let dx=p[0]-c[0];dx-=Math.round(dx/world)*world;ctx.beginPath();ctx.arc(w/2+dx,h/2+p[1]-c[1],radius,0,2*Math.PI);ctx.fillStyle='#2196f333';ctx.fill();ctx.strokeStyle='#1976d2aa';ctx.lineWidth=2;ctx.stroke()}
+ trajectories.forEach((path,index)=>{ctx.beginPath();ctx.strokeStyle=['#64748b','#e28624','#2563eb'][index];ctx.lineWidth=index===2?3:2;ctx.setLineDash(index===0?[5,4]:[]);let pen=false,last=null;
+  for(const point of path){if(!validPoint(point)){pen=false;last=null;continue}const p=project(...point);let dx=p[0]-c[0];dx-=Math.round(dx/world)*world;const x=w/2+dx,y=h/2+p[1]-c[1];if(!pen||(last&&Math.abs(x-last[0])>world/2))ctx.moveTo(x,y);else ctx.lineTo(x,y);pen=true;last=[x,y]}
+  ctx.stroke();ctx.setLineDash([]);
+  if(index===2&&last){ctx.beginPath();ctx.arc(last[0],last[1],5,0,2*Math.PI);ctx.fillStyle=receivedFresh?'#2563eb':'#64748b';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()}
+ });
+}
+function render(){if(!center)return;let c=project(...center),t=project(...target),w=map.clientWidth,h=map.clientHeight,n=2**z;
+ if(w<=0||h<=0){tiles.replaceChildren();return;}
+ const left=c[0]-w/2,top=c[1]-h/2;let world=256*n,dx=t[0]-c[0];dx-=Math.round(dx/world)*world;
+ pin.style.left=(w/2+dx)+'px';pin.style.top=(h/2+t[1]-c[1])+'px';
+ grid.width=w;grid.height=h;const ctx=grid.getContext('2d');ctx.strokeStyle='#c6d6da';ctx.lineWidth=1;
+ for(let x=(( -left%80)+80)%80;x<w;x+=80){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+ for(let y=(( -top%80)+80)%80;y<h;y+=80){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ ctx.fillStyle='#31545b';ctx.font='12px system-ui';let meters=80*40075016.686*Math.cos(center[0]*Math.PI/180)/(256*n);
+ ctx.fillText('北 ↑  东 → · 每格约 '+(meters>=1000?(meters/1000).toFixed(1)+' km':meters.toFixed(1)+' m'),10,h-30);
+ ctx.fillText('中心 '+center[0].toFixed(6)+' N, '+center[1].toFixed(6)+' E',10,h-12);
+ renderTracks(w,h,c,world);
+ if(!online){tiles.replaceChildren();hint.textContent='离线坐标网格 · 无道路楼宇 · 可拖动缩放';return;}
+ let wanted=new Set();
+ for(let y=Math.floor(top/256);y<=Math.floor((top+h-1)/256);y++)for(let x=Math.floor(left/256);x<=Math.floor((left+w-1)/256);x++){
+  if(y<0||y>=n)continue;let tx=((x%n)+n)%n,key=z+'-'+x+'-'+y;wanted.add(key);let img=document.getElementById(key);
+  if(!img){img=new Image();img.id=key;img.alt='';img.draggable=false;img.onload=()=>{if(img.isConnected){img.dataset.failed='';img.style.visibility='visible';hint.textContent='底图含历史缓存 · WGS-84'}};img.onerror=()=>{if(img.isConnected){img.dataset.failed='true';img.style.visibility='hidden';hint.textContent='该视野无可用历史底图；坐标网格保留'}};tiles.append(img);img.src='walklab-tile://osm/'+z+'/'+tx+'/'+y+'.png'}
+  img.style.left=(x*256-left)+'px';img.style.top=(y*256-top)+'px';
+ }
+ for(const img of [...tiles.children])if(!wanted.has(img.id))img.remove();
+ hint.textContent=[...tiles.children].some(i=>i.dataset.failed==='true')?'该视野无可用历史底图；坐标网格保留':tiles.querySelector('img')?.complete?'底图含历史缓存 · WGS-84':'地图加载中…';
+}
+window.setTrajectories=function(ideal,emitted,received,fresh){
+ trajectories=[ideal,emitted,received].map(path=>Array.isArray(path)?path.slice(-3600).map(p=>validPoint(p)?p:[]):[]);receivedFresh=fresh===true;
+ document.getElementById('receiver').hidden=!trajectories[2].some(validPoint);render();
+};
+document.getElementById('receiver').onclick=()=>{const points=trajectories[2].filter(validPoint);if(points.length){center=[...points[points.length-1]];render()}};
+window.setSimulation=function(state,satellites){document.getElementById('simulation').textContent=[state,satellites].filter(Boolean).join('\n')};
+window.setLocation=function(lat,lon){if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -85||lat>85||lon< -180||lon>180)return false;target=[lat,lon];center=[lat,lon];pin.style.display='block';render();return true};
+window.clearLocation=function(){center=target=null;pin.style.display='none';tiles.replaceChildren();hint.textContent='请填写有效坐标'};
+function zoom(d){z=Math.max(3,Math.min(18,z+d));render()}
+mode.onclick=()=>{online=!online;mode.textContent=online?'离线':'联网';mode.title=online?'切换为离线网格':'切换为联网底图';credit.hidden=!online;render()};
+document.getElementById('plus').onclick=()=>zoom(1);document.getElementById('minus').onclick=()=>zoom(-1);document.getElementById('home').onclick=()=>{if(!target)return;center=[...target];for(const img of tiles.children)if(img.dataset.failed==='true')img.src=img.src;render()};
+map.onpointerdown=e=>{if(!center||e.target.closest('button,#simulation'))return;drag={x:e.clientX,y:e.clientY,c:project(...center)};map.setPointerCapture(e.pointerId)};
+map.onpointermove=e=>{if(!drag)return;center=unproject(drag.c[0]-(e.clientX-drag.x),drag.c[1]-(e.clientY-drag.y));render()};
+map.onpointerup=map.onpointercancel=()=>drag=null;
+new ResizeObserver(()=>render()).observe(map);
+</script></html>

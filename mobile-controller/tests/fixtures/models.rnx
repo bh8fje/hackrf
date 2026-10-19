@@ -1,0 +1,45 @@
+     2.11           N: GPS NAV DATA                         RINEX VERSION / TYPE
+teqc  2019Feb25     CORS-ADM Account    20261016 15:45:01UTCPGM / RUN BY / DATE
+Linux 2.4.21-27.ELsmp|Opteron|gcc|Linux 64|=+               COMMENT
+     2.10           N: GPS NAV DATA                         COMMENT
+rvacn.e(1404.07)                        2026-10-16T15:27 UTCCOMMENT
+This file contains the validated broadcast navigation       COMMENT
+messages from the following files:                          COMMENT
+aaaa2890.26n, abpo289o.26n, albh289o.26n, alic289o.26n,     COMMENT
+areq289o.26n, baie289o.26n, bake289o.26n, brew289o.26n,     COMMENT
+brst289o.26n, brux289o.26n, bshm289o.26n, bucu289o.26n,     COMMENT
+cebr289o.26n, cedu289o.26n, chpi289o.26n, chum289o.26n,     COMMENT
+chur289o.26n, ckis289o.26n, coco289o.26n, cro1289o.26n,     COMMENT
+darw289o.26n, dav1289o.26n, dgar289o.26n, djig289o.26n,     COMMENT
+dlf1289o.26n, drao289o.26n, dubo289o.26n, dyng289o.26n,     COMMENT
+ebre289o.26n, fair289o.26n, falk289o.26n, flin289o.26n,     COMMENT
+glps289o.26n, gode289o.26n, guam289o.26n, harb289o.26n,     COMMENT
+hers289o.26n, hlfx289o.26n, hob2289o.26n, hofn289o.26n,     COMMENT
+holb289o.26n, hrao289o.26n, iisc289o.26n, invk289o.26n,     COMMENT
+iqal289o.26n, ista289o.26n, joze289o.26n, jplm289o.26n,     COMMENT
+karr289o.26n, kat1289o.26n, kiri289o.26n, kiru289o.26n,     COMMENT
+koug289o.26n, kour289o.26n, laut289o.26n, lmmf289o.26n,     COMMENT
+lpal289o.26n, m0se289o.26n, maju289o.26n, mal2289o.26n,     COMMENT
+mar6289o.26n, mas1289o.26n, mat1289o.26n, mate289o.26n,     COMMENT
+maw1289o.26n, mcm4289o.26n, mdo1289o.26n, medi289o.26n,     COMMENT
+met3289o.26n, mkea289o.26n, mobs289o.26n, mro1289o.26n,     COMMENT
+nain289o.26n, nano289o.26n, naur289o.26n, nico289o.26n,     COMMENT
+nist289o.26n, nium289o.26n, nklg289o.26n, nlib289o.26n,     COMMENT
+nnor289o.26n, not1289o.26n, nrc1289o.26n, ntus289o.26n,     COMMENT
+onsa289o.26n, orid289o.26n, palm289o.26n, pert289o.26n,     COMMENT
+picl289o.26n, pie1289o.26n, pimo289o.26n, pohn289o.26n,     COMMENT
+prds289o.26n, ptvl289o.26n, qaq1289o.26n, qiki289o.26n,     COMMENT
+reso289o.26n, reyk289o.26n, riga289o.26n, sant289o.26n,     COMMENT
+sask289o.26n, sch2289o.26n, scor289o.26n, seyg289o.26n,     COMMENT
+solo289o.26n, stj3289o.26n, stjo289o.26n, stpm289o.26n,     COMMENT
+suth289o.26n, sydn289o.26n, thtg289o.26n, thu2289o.26n,     COMMENT
+tid1289o.26n, tow2289o.26n, tuva289o.26n, unbj289o.26n,     COMMENT
+usud289o.26n, vacs289o.26n, vald289o.26n, vill289o.26n,     COMMENT
+vis0289o.26n, warn289o.26n, whit289o.26n, will289o.26n,     COMMENT
+wsrt289o.26n, wtzr289o.26n, xmis289o.26n, yar2289o.26n,     COMMENT
+yarr289o.26n, yebe289o.26n, yell289o.26n, zim2289o.26n,     COMMENT
+zimm289o.26n                                                COMMENT
+    1.9558D-08  0.0000D+00 -1.1921D-07  0.0000D+00          ION ALPHA
+    1.2288D+05 -1.6384D+04 -2.6214D+05  1.9661D+05          ION BETA
+   -9.313225746155D-10-8.881784197001D-16    61440     2441 DELTA-UTC: A0,A1,T,W
+                                                            END OF HEADER

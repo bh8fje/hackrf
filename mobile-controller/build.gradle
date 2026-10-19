@@ -1,0 +1,22 @@
+plugins { id 'com.android.application' version '8.7.3' }
+
+android {
+    namespace 'local.hackrf.controller'
+    compileSdk 35
+    ndkVersion '29.0.14206865'
+    sourceSets { main { jniLibs.srcDirs = ['build/nativeLibs']; assets.srcDirs = ['build/nativeAssets'] } }
+    packaging { jniLibs { useLegacyPackaging = true } }
+    buildTypes { release { signingConfig signingConfigs.debug; minifyEnabled false } }
+    defaultConfig {
+        applicationId 'local.hackrf.controller.public'
+        minSdk 26
+        targetSdk 34
+        versionCode 56
+        versionName '0.9.7'
+    }
+}
+
+dependencies { implementation 'com.amap.api:3dmap-location-search:11.3.100_loc11.3.000_sea9.8.1' }
+
+// Keep packaged source policy synchronized even when the native generator is not rebuilt.
+tasks.named('preBuild') { doFirst { copy { from('../shared') { include 'navigation-sources.json', 'signal-environments.json', 'map.html' }; into('build/nativeAssets') } } }

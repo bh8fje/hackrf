@@ -1,0 +1,31 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <instrumentation android:name=".ReceiverSyncCheck" android:targetPackage="local.hackrf.controller.public" android:label="GPS BDS receiver scenario without RF" />
+    <queries><provider android:authorities="local.hackrf.receiver.public.logs" /></queries>
+    <instrumentation android:name=".ReceiverAccessCheck" android:targetPackage="local.hackrf.controller.public" android:label="Receiver log access isolation without RF" />
+    <instrumentation android:name=".UsbUiCheck" android:targetPackage="local.hackrf.controller.public" android:label="USB controller UI check" />
+    <instrumentation android:name=".ImportSceneCheck" android:targetPackage="local.hackrf.controller.public" android:label="Checked developer scene import" />
+    <instrumentation android:name=".NativeGenerationCheck" android:targetPackage="local.hackrf.controller.public" android:label="Native generation without RF" />
+    <application><activity android:name=".SettingsCheck$TestActivity" android:exported="false" /></application>
+    <instrumentation android:name=".SettingsCheck" android:targetPackage="local.hackrf.controller.public" android:label="Settings without USB or RF" />
+    <instrumentation android:name=".PlaceSelectionCheck" android:targetPackage="local.hackrf.controller.public" android:label="Place search and named map selection without RF" />
+    <instrumentation android:name=".ConfigCheck" android:targetPackage="local.hackrf.controller.public" android:label="Mac configuration parity without RF" />
+    <instrumentation android:name=".UiDesignCheck" android:targetPackage="local.hackrf.controller.public" android:label="Consumer screens without RF" />
+    <instrumentation android:name=".ServiceLifecycleCheck" android:targetPackage="local.hackrf.controller.public" android:label="Repeated service cleanup without RF" />
+    <instrumentation android:name=".DirectNetworkCheck" android:targetPackage="local.hackrf.controller.public" android:label="Physical network navigation without RF" />
+    <instrumentation android:name=".MapHistoryCheck" android:targetPackage="local.hackrf.controller.public" android:label="History map cache offline check" />
+    <instrumentation android:name=".BdsGenerationCheck" android:targetPackage="local.hackrf.controller.public" android:label="BDS current-data native generation without RF" />
+    <instrumentation android:name=".BdsPreparationCheck" android:targetPackage="local.hackrf.controller.public" android:label="Planned BDS preflight without RF" />
+    <instrumentation android:name=".BdsTransmitCheck" android:targetPackage="local.hackrf.controller.public" android:label="Actual contained BDS RF acceptance" />
+    <instrumentation android:name=".NavigationDownloadCheck" android:targetPackage="local.hackrf.controller.public" android:label="Current navigation download diagnostics without RF" />
+    <instrumentation android:name=".NavigationResumeCheck" android:targetPackage="local.hackrf.controller.public" android:label="Five-part download cancellation and persistent resume without RF" />
+    <instrumentation android:name=".NativeStallCheck" android:targetPackage="local.hackrf.controller.public" android:label="Native freeze watchdog without RF" />
+    <instrumentation android:name=".SampledGenerationCheck" android:targetPackage="local.hackrf.controller.public" android:label="Galileo foreground native generation without RF" />
+    <instrumentation android:name=".NavigationMirrorCheck" android:targetPackage="local.hackrf.controller.public" android:label="Current alternate archive and visibility without RF" />
+    <instrumentation android:name=".AMapCheck" android:targetPackage="local.hackrf.controller.public" android:label="AMap rendering without RF" />
+    <instrumentation android:name=".NavigationCoverageCheck" android:targetPackage="local.hackrf.controller.public" android:label="Current BDS coverage without RF" />
+    <instrumentation android:name=".MixedStreamCheck" android:targetPackage="local.hackrf.controller.public" android:label="Bounded mixed stream without USB or RF" />
+    <instrumentation android:name=".MixedNativeCheck" android:targetPackage="local.hackrf.controller.public" android:label="Real native mixed stream without USB or RF" />
+    <instrumentation android:name=".UsbStopCheck" android:targetPackage="local.hackrf.controller.public" android:label="Authorized HackRF OFF-only state verification; never TX" />
+    <instrumentation android:name=".SingleNativeCheck" android:targetPackage="local.hackrf.controller.public" android:label="Single native stream null sink without USB or RF" />
+    <instrumentation android:name=".MixedPreparationCheck" android:targetPackage="local.hackrf.controller.public" android:label="Repeated current mixed preparation without USB or RF" />
+</manifest>

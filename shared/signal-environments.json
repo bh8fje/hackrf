@@ -1,0 +1,94 @@
+{
+  "profiles": [
+    {
+      "id": "open",
+      "label": "开阔园区 · 轻微波动"
+    },
+    {
+      "id": "trees",
+      "label": "树荫步道 · 轻度遮挡"
+    },
+    {
+      "id": "building-edge",
+      "label": "道路建筑旁 · 局部遮挡"
+    },
+    {
+      "id": "office",
+      "label": "办公室近窗 · 稳定轻遮挡"
+    }
+  ],
+  "routes": {
+    "stroll": "trees",
+    "office": "office",
+    "roadside": "building-edge",
+    "wander": "open",
+    "park": "trees",
+    "stationary": "office",
+    "circle": "open",
+    "line": "building-edge"
+  },
+  "startupSpeedRangesCmPerSecond": {
+    "stroll": [
+      35,
+      60,
+      85,
+      120
+    ],
+    "office": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "roadside": [
+      70,
+      100,
+      120,
+      160
+    ],
+    "wander": [
+      15,
+      40,
+      60,
+      100
+    ],
+    "park": [
+      30,
+      45,
+      55,
+      80
+    ],
+    "stationary": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "circle": [
+      60,
+      90,
+      140,
+      220
+    ],
+    "line": [
+      50,
+      80,
+      100,
+      130
+    ]
+  },
+  "startupDriftRangesHundredths": {
+    "horizontalDrift": [
+      200,
+      300
+    ],
+    "verticalDrift": [
+      30,
+      80
+    ],
+    "driftSmoothing": [
+      800,
+      1200
+    ]
+  }
+}

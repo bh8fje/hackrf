@@ -1,0 +1,14 @@
+plugins { id 'com.android.application' version '8.7.3' }
+
+android {
+    namespace 'local.hackrf.receiver'
+    compileSdk 35
+    buildTypes { release { signingConfig signingConfigs.debug; minifyEnabled false } }
+    defaultConfig {
+        applicationId 'local.hackrf.receiver.public'
+        minSdk 26
+        targetSdk 34
+        versionCode 12
+        versionName '0.4.8'
+    }
+}
