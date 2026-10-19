@@ -19,6 +19,22 @@ for(z=3;z<=18;z++)for(const [lat,lon] of [[39.9,116.4],[0,0],[-33.86,151.2],[60,
         self.assertIn('© <a href="https://www.openstreetmap.org/copyright">',html)
         self.assertNotIn('geolocation',script)
         self.assertIn('let z=15,center',script)
+    def test_default_view_is_white_house_without_target(self):
+        script=re.search(r'<script>(.*)</script>',(ROOT/'shared/map.html').read_text(),re.S)[1]
+        harness="""
+const controls={};
+const document={getElementById(id){return controls[id]??=( {style:{},clientWidth:0,clientHeight:0,replaceChildren(){}} );}};
+const window={};class ResizeObserver{constructor(callback){this.callback=callback}observe(){this.callback()}}
+"""
+        check="""
+if(center[0]!==38.89761||center[1]!==-77.03637||target!==null||pin.style.display!=='none')throw Error('Default view must not select a target');
+window.setLocation(51.5,-.12);if(target[0]!==51.5)throw Error('Explicit selection lost');
+window.clearLocation();if(target!==null||center[0]!==38.89761||center[1]!==-77.03637||pin.style.display!=='none')throw Error('Empty target must retain public view');
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            js=Path(tmp)/'default-map.js';js.write_text(harness+script+check)
+            subprocess.run(['node',str(js)],check=True)
+
     def test_received_tracks_preserve_gaps_and_freshness_colour(self):
         html=(ROOT/'shared/map.html').read_text();script=re.search(r'<script>(.*)</script>',html,re.S)[1]
         functions='\n'.join(re.findall(r'^function (?:project|validPoint).*$',script,re.M))

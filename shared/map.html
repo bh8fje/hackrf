@@ -3,7 +3,8 @@ html,body{margin:0;height:100%;font:13px system-ui;color:#193b42}#map{height:100
 </style><div id="map" role="region" aria-label="导航轨迹地图，可拖动和缩放"><canvas id="grid"></canvas><div id="tiles"></div><canvas id="tracks" aria-hidden="true"></canvas><div id="pin"></div><div id="hint" role="status">地图加载中…</div><div id="simulation" role="status"></div><div id="tools"><button id="receiver" aria-label="回到最近的 GNSS 接收位置" hidden>接收点</button><button id="mode" aria-label="切换离线网格或联网底图" title="切换为联网底图">联网</button><button id="minus" aria-label="缩小地图">−</button><button id="plus" aria-label="放大地图">＋</button><button id="home" aria-label="回到模拟地点">◎</button></div><div id="credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a></div></div><script>
 'use strict';
 const map=document.getElementById('map'),tiles=document.getElementById('tiles'),pin=document.getElementById('pin'),hint=document.getElementById('hint');
-let z=15,center=null,target=null,drag=null,online=false;
+let z=15,center=[38.89761,-77.03637],target=null,drag=null,online=false;
+pin.style.display='none';
 let trajectories=[[],[],[]],receivedFresh=false;
 const grid=document.getElementById("grid"),credit=document.getElementById("credit"),mode=document.getElementById("mode");credit.hidden=true;
 function project(lat,lon){let n=256*2**z,r=Math.max(-85.05112878,Math.min(85.05112878,lat))*Math.PI/180;return [(lon+180)/360*n,(1-Math.asinh(Math.tan(r))/Math.PI)/2*n]}
@@ -18,7 +19,7 @@ function renderTracks(w,h,c,world){
   if(index===2&&last){ctx.beginPath();ctx.arc(last[0],last[1],5,0,2*Math.PI);ctx.fillStyle=receivedFresh?'#2563eb':'#64748b';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()}
  });
 }
-function render(){if(!center)return;let c=project(...center),t=project(...target),w=map.clientWidth,h=map.clientHeight,n=2**z;
+function render(){if(!center)return;let c=project(...center),t=project(...(target||center)),w=map.clientWidth,h=map.clientHeight,n=2**z;
  if(w<=0||h<=0){tiles.replaceChildren();return;}
  const left=c[0]-w/2,top=c[1]-h/2;let world=256*n,dx=t[0]-c[0];dx-=Math.round(dx/world)*world;
  pin.style.left=(w/2+dx)+'px';pin.style.top=(h/2+t[1]-c[1])+'px';
@@ -46,7 +47,7 @@ window.setTrajectories=function(ideal,emitted,received,fresh){
 document.getElementById('receiver').onclick=()=>{const points=trajectories[2].filter(validPoint);if(points.length){center=[...points[points.length-1]];render()}};
 window.setSimulation=function(state,satellites){document.getElementById('simulation').textContent=[state,satellites].filter(Boolean).join('\n')};
 window.setLocation=function(lat,lon){if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -85||lat>85||lon< -180||lon>180)return false;target=[lat,lon];center=[lat,lon];pin.style.display='block';render();return true};
-window.clearLocation=function(){center=target=null;pin.style.display='none';tiles.replaceChildren();hint.textContent='请填写有效坐标'};
+window.clearLocation=function(){center=[38.89761,-77.03637];target=null;pin.style.display='none';render()};
 function zoom(d){z=Math.max(3,Math.min(18,z+d));render()}
 mode.onclick=()=>{online=!online;mode.textContent=online?'离线':'联网';mode.title=online?'切换为离线网格':'切换为联网底图';credit.hidden=!online;render()};
 document.getElementById('plus').onclick=()=>zoom(1);document.getElementById('minus').onclick=()=>zoom(-1);document.getElementById('home').onclick=()=>{if(!target)return;center=[...target];for(const img of tiles.children)if(img.dataset.failed==='true')img.src=img.src;render()};

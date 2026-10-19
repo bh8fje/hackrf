@@ -74,6 +74,7 @@ final class LocationMap extends LinearLayout {
             MapsInitializer.updatePrivacyShow(getContext(),true,true);MapsInitializer.updatePrivacyAgree(getContext(),true);
             nativeView=new MapView(getContext());nativeView.onCreate(null);
             canvas.addView(nativeView,0,new FrameLayout.LayoutParams(-1,-1));map=nativeView.getMap();
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.89761,-77.03637),14));
             map.setOnMapClickListener(this::pick);
             map.setOnMarkerDragListener(new AMap.OnMarkerDragListener(){
                 public void onMarkerDragStart(Marker value){}

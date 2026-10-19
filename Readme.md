@@ -41,7 +41,7 @@
 - 支持散步、办公室、沿路行走、随意游走，以及保留的静止、直线、绕圆等模型。办公室模型以久坐和偶尔短距离移动为目标，不把突然跳点当作自然运动。
 - 轨迹包含速度、方向、高度变化、随机种子、起始偏移及水平/垂直漂移；共享配置用于对齐桌面端和 Android。信号环境包括开阔区域、树荫、建筑旁和办公室；这些是模型，不是实地测量或标定后的传播环境。
 - 仅内置**白宫、唐宁街10号、国会山**三个公开示例。坐标和参考高度是演示近似值；地点名称不意味着项目与相应机构有关联。用户可自行新增、修改、删除地点。
-- 默认离线坐标网格；可加载 **OpenStreetMap**，不需要 Key。可选**高德地图**，使用用户自己的 Key。桌面文字地址查找使用系统 Apple 地图服务。
+- 地图默认视野为白宫；未选点时不自动设置接收器目标。默认离线坐标网格；可加载 **OpenStreetMap**，不需要 Key。可选**高德地图**，使用用户自己的 Key。桌面文字地址查找使用系统 Apple 地图服务。
 - 模拟以 WGS-84 为基准；高德 GCJ-02 选点需要坐标转换，存在转换和地图数据误差。
 
 ### 北斗能力来自哪里？
@@ -99,7 +99,7 @@ Motion models include strolling, office behavior, roadside walking and wandering
 
 The only bundled examples are the **White House, 10 Downing Street and Capitol Hill**. Coordinates and heights are approximate demonstration values; the names imply no affiliation. Users can manage their own locations locally.
 
-The default is an offline coordinate grid. **OpenStreetMap** requires no API key. **AMap/Gaode** is optional and uses the user's own credentials. Desktop text search uses Apple's map service. Simulation coordinates use WGS-84; GCJ-02 map selections require conversion and have conversion/data limitations.
+The default map view is the White House; an unselected receiver target remains empty. The default map layer is an offline coordinate grid. **OpenStreetMap** requires no API key. **AMap/Gaode** is optional and uses the user's own credentials. Desktop text search uses Apple's map service. Simulation coordinates use WGS-84; GCJ-02 map selections require conversion and have conversion/data limitations.
 
 ### Where does BeiDou support come from?
 
