@@ -9,12 +9,7 @@ UTC=timezone.utc
 BDT_EPOCH=datetime(2006,1,1,tzinfo=UTC)
 
 
-def convert(broadcast,models,start_utc,offset,duration):
-    if type(duration) is not int or not 60<=duration<=600:raise ValueError('BDS duration must be 60–600 seconds')
-    rows=broadcast.splitlines()
-    if not rows or not 3<=float(rows[0][:9])<4:raise ValueError('BDS requires RINEX3')
-    end=next((i for i,r in enumerate(rows) if r[60:].strip()=='END OF HEADER'),None)
-    if end is None:raise ValueError('Missing navigation header')
+def validated_models(models,start_utc,offset):
     model_rows=[];alpha=set();beta=set();delta=None
     for row in models.splitlines():
         label=row[60:].strip()
@@ -33,7 +28,18 @@ def convert(broadcast,models,start_utc,offset,duration):
             delta=row;model_rows.append(row)
         elif label=='LEAP SECONDS':
             if int(row[:6])!=offset:raise ValueError('BDS navigation and IERS leap offset disagree')
-    if not alpha or alpha!=beta or delta is None:raise ValueError('Incomplete BDSA/BDSB/BDUT models')
+    paired=alpha & beta
+    if not paired or delta is None:raise ValueError('Incomplete BDSA/BDSB/BDUT models')
+    return [row for row in model_rows if row[:4] not in ('BDSA','BDSB') or row[53:60].strip() in paired]
+
+
+def convert(broadcast,models,start_utc,offset,duration):
+    if type(duration) is not int or not 60<=duration<=600:raise ValueError('BDS duration must be 60–600 seconds')
+    rows=broadcast.splitlines()
+    if not rows or not 3<=float(rows[0][:9])<4:raise ValueError('BDS requires RINEX3')
+    end=next((i for i,r in enumerate(rows) if r[60:].strip()=='END OF HEADER'),None)
+    if end is None:raise ValueError('Missing navigation header')
+    model_rows=validated_models(models,start_utc,offset)
     start_bdt=start_utc+timedelta(seconds=offset-14)
     finish=start_bdt+timedelta(seconds=duration)
     chosen={}
@@ -76,7 +82,11 @@ def prepare(folder,duration,lead=0):
         try:
             # Refresh orbits; a validated current model cache avoids downloading unchanged UTC data again.
             text,info=cached_fetch(url,10800,force=not bool(candidates))
-            if any(r.startswith('BDSB') for r in text.splitlines()) and any(r.startswith('BDUT') for r in text.splitlines()) and (models is None or publication(text,info)>publication(*models)):models=(text,info)
+            if any(r.startswith('BDSB') for r in text.splitlines()) and any(r.startswith('BDUT') for r in text.splitlines()):
+                try:
+                    validated_models(text,datetime.now(UTC)+timedelta(seconds=lead),offset)
+                    if models is None or publication(text,info)>publication(*models):models=(text,info)
+                except ValueError as error:failures.append({'url':url,'error':str(error)})
             if -60<=(datetime.now(UTC)-publication(text,info)).total_seconds()<=1800:candidates.append((text,info))
             if models:
                 covered=False

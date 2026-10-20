@@ -31,7 +31,11 @@ final class BdsNavigation {
                 delta=true;headers.append(row).append('\n');
             }else if(label.equals("LEAP SECONDS")&&Integer.parseInt(part(row,0,6).trim())!=offset)throw new IOException("北斗导航与IERS闰秒不一致");
         }
-        if(alpha.isEmpty()||!alpha.equals(beta)||!delta)throw new IOException("北斗BDSA/BDSB/BDUT模型不完整");
+        alpha.retainAll(beta);
+        if(alpha.isEmpty()||!delta)throw new IOException("北斗BDSA/BDSB/BDUT模型不完整");
+        StringBuilder pairedHeaders=new StringBuilder();
+        for(String row:headers.toString().split("\\R"))if(!(row.startsWith("BDSA")||row.startsWith("BDSB"))||alpha.contains(part(row,53,60).trim()))pairedHeaders.append(row).append('\n');
+        headers=pairedHeaders;
         TreeMap<Integer,String> chosen=new TreeMap<>();Map<Integer,Instant> latest=new HashMap<>();
         Instant latestHealthy=null;
         int[][] required={{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,2},{0,1,2,3},{0,1}};

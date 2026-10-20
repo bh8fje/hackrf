@@ -30,6 +30,17 @@ class BdsNavigationTest(unittest.TestCase):
         rows[i+6]=rows[i+6][:23]+f'{1:19.12E}'+rows[i+6][42:]
         with self.assertRaises(ValueError):convert(''.join(rows),models,START,18,90)
 
+    def test_unpaired_extra_model_rows_do_not_discard_complete_pairs(self):
+        raw=(FIX/'bds-broadcast.rnx').read_text();models=(FIX/'bds-models.rnx').read_text()
+        rows=models.splitlines();a=next(r for r in rows if r.startswith('BDSA'));b=next(r for r in rows if r.startswith('BDSB'))
+        tagged=lambda row,key:row[:53]+key.ljust(7)+row[60:]
+        # A mixed publication can contain unmatched aggregate rows as well as complete tagged pairs.
+        mixed='\n'.join([tagged(a,''),tagged(b,'4'),tagged(a,'H 11'),tagged(b,'H 11')]+[r for r in rows if r[:4] not in ('BDSA','BDSB')])+'\n'
+        text,_=convert(raw,mixed,START,18,90)
+        self.assertEqual([r[53:60].strip() for r in text.splitlines() if r[:4] in ('BDSA','BDSB')],['H 11','H 11'])
+        with self.assertRaisesRegex(ValueError,'Incomplete'):
+            convert(raw,mixed.replace('BDSB','GPSB'),START,18,90)
+
     def test_current_fallback_checks_orbit_coverage(self):
         class Frozen(datetime):
             @classmethod
@@ -68,6 +79,13 @@ class BdsNavigationTest(unittest.TestCase):
             expected=convert((FIX/'bds-broadcast.rnx').read_text(),(FIX/'bds-models.rnx').read_text(),START,18,90)[0]
             command=[str(JAVA/'java'),'-cp',tmp,'local.hackrf.controller.BdsCheck',str(FIX)]
             self.assertEqual(subprocess.check_output(command+[START.isoformat()],text=True),expected)
+            # Both platforms ignore an unmatched extra model without losing the validated pair.
+            samples=folder/'mixed-models';samples.mkdir()
+            models=(FIX/'bds-models.rnx').read_text();alpha=next(r for r in models.splitlines() if r.startswith('BDSA'))
+            extra=alpha[:53]+'X 63'.ljust(7)+alpha[60:]+'\n'
+            (samples/'bds-models.rnx').write_text(extra+models)
+            (samples/'bds-broadcast.rnx').write_text((FIX/'bds-broadcast.rnx').read_text())
+            self.assertEqual(subprocess.check_output(command[:-1]+[str(samples),START.isoformat()],text=True),expected)
             for duration in (181,300,600):
                 self.assertEqual(subprocess.check_output(command+[START.isoformat(),str(duration)],text=True),convert((FIX/'bds-broadcast.rnx').read_text(),(FIX/'bds-models.rnx').read_text(),START,18,duration)[0])
             self.assertNotEqual(subprocess.run(command+[START.isoformat(),'601'],capture_output=True).returncode,0)
