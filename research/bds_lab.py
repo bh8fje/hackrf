@@ -183,7 +183,7 @@ def run(settings, folder, execute, emit, archive=False, planned=False):
     nmea=(folder/'fix.nmea').read_text() if (folder/'fix.nmea').exists() else ''
     stats=summarize(nmea,ideal,emitted,settings['duration'],start)
     with iq.open('rb') as stream:digest=hashlib.file_digest(stream,'sha256').hexdigest()
-    origin=np.array(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],settings['height'])))
+    origin=np.array(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],preview['ellipsoidHeight'])))
     fixes=[ecef(fix) for line in nmea.splitlines() if (fix:=gga(line)) is not None]
     decoded=(np.asarray(fixes)-origin) @ enu_basis(preview['wgs84Latitude'],preview['wgs84Longitude']).T if fixes else np.empty((0,3))
     elapsed=time.monotonic()-prepared_at

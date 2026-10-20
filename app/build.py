@@ -30,7 +30,7 @@ subprocess.run(['swiftc', '-parse-as-library', '-swift-version', '6', '-target',
 with (contents / 'Info.plist').open('wb') as stream:
     plistlib.dump({'CFBundleIdentifier': 'local.hackrf.walklab.public', 'CFBundleName': '天书',
                   'CFBundleDisplayName': '天书', 'CFBundleExecutable': 'WalkLab',
-                  'CFBundleIconFile': 'AppIcon', 'CFBundlePackageType': 'APPL', 'CFBundleShortVersionString': '0.9.11', 'CFBundleVersion': '60',
+                  'CFBundleIconFile': 'AppIcon', 'CFBundlePackageType': 'APPL', 'CFBundleShortVersionString': '0.9.13', 'CFBundleVersion': '62',
                   'LSMinimumSystemVersion': '14.0', 'NSHighResolutionCapable': True,
                   'NSAppTransportSecurity': {'NSAllowsLocalNetworking': True},
                   'NSLocationWhenInUseUsageDescription': '识别当前城市，作为地点文字查找的默认城市。不会改变模拟目标。', 'NSLocationUsageDescription': '识别当前城市用于地点查找。', 'ProjectRoot': str(root.parent)}, stream)

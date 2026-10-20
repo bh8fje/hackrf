@@ -171,7 +171,7 @@ def run(settings,folder,execute,emit,planned=False):
                   sampleRate=RATE,frequencyHz=1575420000,durationSeconds=int(settings['duration']),
                   preparedFilesSHA256={name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in ('scenario.json','broadcast-galileo.rnx','emitted.csv')},
                   waveform='CBOC(6,1,1/11)',limitations=['16 Msps limits represented bandwidth below the Galileo E1 24.552 MHz receiver reference bandwidth.','Channel ionosphere uses the current GPS Klobuchar model; not a calibrated Galileo NeQuick propagation model.'])
-    origin=np.array(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],settings['height'])))
+    origin=np.array(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],preview['ellipsoidHeight'])))
     fixes=[ecef(fix) for line in nmea.splitlines() if (fix:=gga(line)) is not None]
     decoded=(np.asarray(fixes)-origin)@enu_basis(preview['wgs84Latitude'],preview['wgs84Longitude']).T if fixes else np.empty((0,3))
     result.update(folder=str(folder),startUTC=timing['startUTC'] if planned else None,sceneSatellites=[f'E{p:02d}'for p in prns],

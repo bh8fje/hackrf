@@ -267,7 +267,7 @@ def run_once(settings, folder):
     stats = compare(observations, emitted)
     ideal_stats = compare(observations, ideal)
     basis = enu_basis(preview['wgs84Latitude'], preview['wgs84Longitude'])
-    origin = np.array(ecef((preview['wgs84Latitude'], preview['wgs84Longitude'], settings['height'])))
+    origin = np.array(ecef((preview['wgs84Latitude'], preview['wgs84Longitude'], preview['ellipsoidHeight'])))
     decoded = (np.asarray(observations)[:, 1:] - origin) @ basis.T if observations else np.empty((0, 3))
     with iq.open('rb') as stream:
         digest = hashlib.file_digest(stream, 'sha256').hexdigest()

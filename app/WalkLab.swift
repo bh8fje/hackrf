@@ -74,6 +74,8 @@ struct PreviewInfo: Decodable, Sendable {
     let idealHeightMax: Double
     let emittedHeightMin: Double
     let emittedHeightMax: Double
+    let geoidUndulation: Double?
+    let ellipsoidHeight: Double?
     let maxHorizontalDrift: Double
     let estimatedFileMB: Int
     let streamMBps: Double?
@@ -1110,16 +1112,19 @@ struct ContentView: View {
                             $0.longitude == model.settings.longitude && $0.coordinateSystem == model.settings.coordinateSystem
                         })?.referenceElevation {
                             Text("参考海拔：\(elevation, specifier: "%.0f") 米（Copernicus / Open-Meteo，约 90 米网格）").font(.caption)
-                            Text("初始上下限以参考高度为中心；手动设置按地点保存。数值为模拟近似值，未经椭球高换算。").font(.caption).foregroundStyle(.secondary)
+                            Text("初始海拔上下限以参考高度为中心；手动海拔按地点保存。生成前按 EGM2008 换算为椭球高。").font(.caption).foregroundStyle(.secondary)
                         }
                         if !model.heightKnown {
                             Text("此地点没有高度资料。请填写下方模拟高度，再确认使用；不会读取上一个地点的高度。").font(.caption).foregroundStyle(.orange)
                             Button("确认使用高度设置") { model.heightKnown = true; model.updatePreview() }
                         }
-                        number("高度下限 / 米", heightMinimum)
-                        number("高度上限 / 米", heightMaximum)
+                        number("海拔下限 / 米", heightMinimum)
+                        number("海拔上限 / 米", heightMaximum)
                         number("高度平滑时间 / 秒", $model.settings.heightSmoothing)
-                        Text("生成器按椭球高解释输入；参考地面海拔未经高程基准换算。高度范围按地点保存，垂直漂移另行叠加。").font(.caption).foregroundStyle(.secondary)
+                        Text("输入为 EGM2008 海拔；生成前按 h = H + N 换算为 WGS-84 椭球高。GPS 与北斗共用转换后的三维轨迹；垂直漂移另行叠加。").font(.caption).foregroundStyle(.secondary)
+                        if let n = model.preview?.geoidUndulation, let h = model.preview?.ellipsoidHeight {
+                            Text(String(format: "EGM2008 高程差 N：%+.2f 米 · 基准椭球高 h：%.2f 米", n, h)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        }
                     }
                     Section("运动方式") {
                         Picker("路线", selection: $model.settings.route) { Text("园区步行（平滑随机路线）").tag("park"); Text("办公室（久坐与短距离走动）").tag("stationary"); Text("绕中心行走").tag("circle"); Text("直线行走").tag("line") }.onChange(of: model.settings.route) { _, _ in model.randomizeSpeed() }
@@ -1192,7 +1197,7 @@ struct ContentView: View {
                             .tabItem { Label("接收与卫星数据", systemImage: "antenna.radiowaves.left.and.right") }
                     }.frame(height: min(680, max(420, geometry.size.height * 0.58)) + 145)
                     HStack(spacing: 10) {
-                        metric("模型高度范围", model.preview.map { String(format: "%.2f–%.2f m", $0.emittedHeightMin, $0.emittedHeightMax) } ?? "—", "模型值，非接收精度")
+                        metric("模型椭球高范围", model.preview.map { String(format: "%.2f–%.2f m", $0.emittedHeightMin, $0.emittedHeightMax) } ?? "—", "模型值，非接收精度")
                         metric("解码误差中位数", model.result?.isHardwareStream == true ? "—" : model.result?.medianError.map { String(format: "%.2f m", $0) } ?? "—", model.result?.isHardwareStream == true ? "硬件检查不代表接收定位通过" : "相对叠加漂移后的轨迹")
                         metric("有效定位点", model.result?.validFixesText ?? "—", model.result?.isHardwareStream == true ? "本轮接收记录单独验收" : "由 GNSS-SDR 独立解算")
                     }

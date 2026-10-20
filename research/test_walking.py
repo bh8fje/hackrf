@@ -11,8 +11,8 @@ class WalkingTest(unittest.TestCase):
         lat, lon = eviltransform.wgs2gcj(preview['wgs84Latitude'], preview['wgs84Longitude'])
         self.assertAlmostEqual(lat, settings['latitude'], delta=1e-6)
         self.assertAlmostEqual(lon, settings['longitude'], delta=1e-6)
-        self.assertLessEqual(preview['idealHeightMax'] - 500, 0.08)
-        self.assertGreaterEqual(preview['idealHeightMin'] - 500, -0.08)
+        self.assertLessEqual(preview['idealHeightMax'] - preview['ellipsoidHeight'], 0.08)
+        self.assertGreaterEqual(preview['idealHeightMin'] - preview['ellipsoidHeight'], -0.08)
         self.assertAlmostEqual(preview['maxHorizontalDrift'], 2.5)
         self.assertEqual(len(ideal), 902)
         self.assertFalse(preview['rfEnabled'])
@@ -37,8 +37,8 @@ class WalkingTest(unittest.TestCase):
         from crosscheck import ecef
         for route in ('stationary','park','circle','line'):
             settings=dict(DEFAULTS,route=route)
-            ideal,emitted,_=plan(settings)
-            first=(emitted[0,1:]-np.array(ecef((settings['latitude'],settings['longitude'],settings['height'])))) @ enu_basis(settings['latitude'],settings['longitude']).T
+            ideal,emitted,preview=plan(settings)
+            first=(emitted[0,1:]-np.array(ecef((settings['latitude'],settings['longitude'],preview['ellipsoidHeight'])))) @ enu_basis(settings['latitude'],settings['longitude']).T
             np.testing.assert_allclose(first[:2],startup_offset(settings['seed']),atol=1e-8)
 
     def test_realistic_routes_and_sampling(self):
@@ -133,11 +133,11 @@ class WalkingTest(unittest.TestCase):
         ideal, _, preview = plan(settings)
         from walking import enu_basis
         from crosscheck import ecef
-        enu = (ideal[:, 1:] - np.array(ecef((settings['latitude'], settings['longitude'], settings['height'])))) @ enu_basis(settings['latitude'], settings['longitude']).T
+        enu = (ideal[:, 1:] - np.array(ecef((settings['latitude'], settings['longitude'], preview['ellipsoidHeight'])))) @ enu_basis(settings['latitude'], settings['longitude']).T
         self.assertLessEqual(np.linalg.norm(enu[:, :2], axis=1).max(), 50+1e-8)
         self.assertGreater(enu[10, 1], enu[5, 1])
-        self.assertGreaterEqual(preview['idealHeightMin'], 390)
-        self.assertLessEqual(preview['idealHeightMax'], 410)
+        self.assertGreaterEqual(preview['idealHeightMin'], 390+preview['geoidUndulation'])
+        self.assertLessEqual(preview['idealHeightMax'], 410+preview['geoidUndulation'])
         for changes in ({'radius': 9}, {'height': -500}, {'height': 10000}):
             with self.assertRaises(ValueError):
                 plan(dict(settings, **changes))
@@ -174,8 +174,8 @@ class WalkingTest(unittest.TestCase):
         self.assertFalse(np.array_equal(plan(a)[0], plan(b)[0]))
 
     def test_requested_target_and_duration_endpoints(self):
-        self.assertAlmostEqual(DEFAULTS['latitude'], 30 + 39/60 + 29/3600)
-        self.assertAlmostEqual(DEFAULTS['longitude'], 104 + 6/60 + 13/3600)
+        self.assertAlmostEqual(DEFAULTS['latitude'], 38.89761)
+        self.assertAlmostEqual(DEFAULTS['longitude'], -77.03637)
         self.assertEqual(DEFAULTS['coordinateSystem'], 'WGS-84')
         for duration in (60, 180, 600):
             ideal, _, preview = plan(dict(DEFAULTS, duration=duration))

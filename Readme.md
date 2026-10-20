@@ -42,6 +42,7 @@
 - 轨迹包含速度、方向、高度变化、随机种子、起始偏移及水平/垂直漂移；共享配置用于对齐桌面端和 Android。信号环境包括开阔区域、树荫、建筑旁和办公室；这些是模型，不是实地测量或标定后的传播环境。
 - 仅内置**白宫、唐宁街10号、国会山**三个公开示例。坐标和参考高度是演示近似值；地点名称不意味着项目与相应机构有关联。用户可自行新增、修改、删除地点。
 - 地图默认视野为白宫；未选点时不自动设置接收器目标。默认离线坐标网格；可加载 **OpenStreetMap**，不需要 Key。可选**高德地图**，使用用户自己的 Key。桌面文字地址查找使用系统 Apple 地图服务。
+- macOS 地图海拔按 EGM2008 通过 `h = H + N` 转成椭球高，再生成 GPS、北斗共用的 ECEF 轨迹；模型离线附带，显示换算值。Android 原生轨迹暂不包含此换算，仍需输入椭球高。模型与局限见 [高程模型说明](shared/geoids/README.md)。
 - 模拟以 WGS-84 为基准；高德 GCJ-02 选点需要坐标转换，存在转换和地图数据误差。
 
 ### 北斗能力来自哪里？
@@ -99,7 +100,7 @@ Motion models include strolling, office behavior, roadside walking and wandering
 
 The only bundled examples are the **White House, 10 Downing Street and Capitol Hill**. Coordinates and heights are approximate demonstration values; the names imply no affiliation. Users can manage their own locations locally.
 
-The default map view is the White House; an unselected receiver target remains empty. The default map layer is an offline coordinate grid. **OpenStreetMap** requires no API key. **AMap/Gaode** is optional and uses the user's own credentials. Desktop text search uses Apple's map service. Simulation coordinates use WGS-84; GCJ-02 map selections require conversion and have conversion/data limitations.
+The default map view is the White House; an unselected receiver target remains empty. The default map layer is an offline coordinate grid. **OpenStreetMap** requires no API key. **AMap/Gaode** is optional and uses the user's own credentials. Desktop text search uses Apple's map service. On macOS, EGM2008 map/orthometric heights are converted with `h = H + N` before the shared GPS/BDS ECEF trajectory is generated. The grid is bundled for offline use. Android native trajectories do not yet perform this conversion and require ellipsoidal-height input. See the [grid notes and limitations](shared/geoids/README.md). Simulation coordinates use WGS-84; GCJ-02 map selections require conversion and have conversion/data limitations.
 
 ### Where does BeiDou support come from?
 

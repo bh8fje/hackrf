@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import eviltransform
 from crosscheck import ecef
+from geoid import undulation
 
 DEFAULTS = {'longitude': -77.03637, 'latitude': 38.89761, 'coordinateSystem': 'WGS-84',
             'height': 18.0, 'duration': 60, 'speed': 0.5, 'radius': 12.0,
@@ -147,6 +148,8 @@ def plan(settings):
         if eviltransform.outOfChina(lat, lon):
             raise ValueError('该 GCJ-02 离线近似转换只适用于中国大陆范围；其他位置请选 WGS-84')
         lat, lon = eviltransform.gcj2wgs_exact(lat, lon)
+    geoid_height = undulation(lat, lon)
+    ellipsoid_height = s['height'] + geoid_height
     t = np.arange(int(s['duration']) * 10 + 2) / 10
     rng = np.random.default_rng(int(s['seed']))
     phase = rng.uniform(0, 2 * np.pi, 6)
@@ -221,7 +224,7 @@ def plan(settings):
         emitted_enu[:, 1] -= correction*np.sin(heading)
     emitted_enu[:, :2] += offset
     basis = enu_basis(lat, lon)
-    origin = np.array(ecef((lat, lon, s['height'])))
+    origin = np.array(ecef((lat, lon, ellipsoid_height)))
     ideal = np.column_stack((t, origin + ideal_enu @ basis))
     emitted = np.column_stack((t, origin + emitted_enu @ basis))
     step = max(1, int(math.ceil(len(t) / 240)))
@@ -233,9 +236,11 @@ def plan(settings):
                'sampleTimes': t[sample_indices].tolist(), 'wgs84Latitude' : lat, 'wgs84Longitude': lon,
                'coordinateConversion': '离线近似逆转换，非测绘校准' if s['coordinateSystem'] == 'GCJ-02' else '直接使用 WGS-84',
                'idealPath': ideal_enu[::step, :2].tolist(), 'emittedPath': emitted_enu[::step, :2].tolist(),
-               'idealHeightMin': float(s['height'] + up.min()), 'idealHeightMax': float(s['height'] + up.max()),
-               'emittedHeightMin': float(s['height'] + emitted_enu[:, 2].min()),
-               'emittedHeightMax': float(s['height'] + emitted_enu[:, 2].max()),
+               'heightDatum': 'WGS84-ellipsoidal', 'inputHeightMSL': s['height'],
+               'geoidModel': 'EGM2008-5', 'geoidUndulation': geoid_height, 'ellipsoidHeight': ellipsoid_height,
+               'idealHeightMin': float(ellipsoid_height + up.min()), 'idealHeightMax': float(ellipsoid_height + up.max()),
+               'emittedHeightMin': float(ellipsoid_height + emitted_enu[:, 2].min()),
+               'emittedHeightMax': float(ellipsoid_height + emitted_enu[:, 2].max()),
                'maxHorizontalDrift': float(np.linalg.norm(emitted_enu[:, :2]-ideal_enu[:, :2]-offset, axis=1).max()),
                'startupOffsetEast': float(offset[0]), 'startupOffsetNorth': float(offset[1]),
                'estimatedFileMB': int(s['duration'] * 5.2), 'rfEnabled': False}

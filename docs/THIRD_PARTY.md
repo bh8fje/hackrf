@@ -33,3 +33,7 @@ The URL templates in [`shared/navigation-sources.json`](../shared/navigation-sou
 ## 许可证范围 / License scope
 
 Keep the upstream submodules and their notices intact. The root HackRF license does not replace dependency licenses or service terms, and this public fork does not grant new rights over third-party code. The absence of a SignalSim LICENSE file is recorded explicitly rather than filled in with an invented license. No personal API keys or signing materials are distributed.
+
+## macOS height datum conversion
+
+The macOS trajectory path uses the offline GeographicLib EGM2008 5-minute grid, based on the NGA Earth Gravitational Model, to convert EGM2008 orthometric map heights to WGS84 ellipsoidal heights. Dataset origins, hashes, interpolation error and the separate Android scope are documented in [shared/geoids/README.md](../shared/geoids/README.md). The grid's original metadata is preserved; the map DEM and geoid model are distinct inputs.

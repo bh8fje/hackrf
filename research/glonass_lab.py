@@ -189,7 +189,7 @@ def run(settings,folder,source_folder,execute,emit,planned=False):
                   sampleRate=RATE,frequencyHz=1602000000,durationSeconds=duration,
                   preparedFilesSHA256={name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in ('scenario.json','broadcast-glonass.rnx','emitted.csv')},
                   limitations=['Native GNav omits RINEX3.05 group-delay/accuracy extensions.','Single-frequency channel uses GPS Klobuchar; receiver ionosphere correction disabled.','PZ-90/WGS-84 frame equivalence not independently calibrated.'])
-    origin=np.asarray(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],settings['height'])));points=(emitted[:,1:]-origin)@enu_basis(preview['wgs84Latitude'],preview['wgs84Longitude']).T
+    origin=np.asarray(ecef((preview['wgs84Latitude'],preview['wgs84Longitude'],preview['ellipsoidHeight'])));points=(emitted[:,1:]-origin)@enu_basis(preview['wgs84Latitude'],preview['wgs84Longitude']).T
     scenario={'id':folder.name,'phase':'prepared','startUTC':start.isoformat(),'durationSeconds':duration,'targetLatitude':preview['wgs84Latitude'],'targetLongitude':preview['wgs84Longitude'],'constellationId':3,'svids':slots,
               'points':[[float(emitted[i,0]),float(points[i,0]),float(points[i,1])]for i in range(0,len(emitted),10)]}
     (folder/'phone-scenario.json').write_text(json.dumps(scenario))
